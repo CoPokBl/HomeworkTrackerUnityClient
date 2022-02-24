@@ -20,6 +20,7 @@ public class GUI : MonoBehaviour {
     public void Logout() {
         PlayerPrefs.DeleteKey("username");
         PlayerPrefs.DeleteKey("password");
+        PlayerPrefs.Save();
         SceneManager.LoadScene("Login");
     }
 

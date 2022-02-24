@@ -55,6 +55,7 @@ public class Login : MonoBehaviour {
         // Login is 0
         PlayerPrefs.SetString("username", username.text);
         PlayerPrefs.SetString("password", APIShit.Hash(password.text));
+        PlayerPrefs.Save();
         
         APIShit.SetUsernameAndPassword(username.text, password.text);
 
