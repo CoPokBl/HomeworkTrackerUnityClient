@@ -18,8 +18,7 @@ public class GUI : MonoBehaviour {
     public GameObject viewContent;
 
     public void Logout() {
-        PlayerPrefs.DeleteKey("username");
-        PlayerPrefs.DeleteKey("password");
+        PlayerPrefs.DeleteKey("token");
         PlayerPrefs.Save();
         SceneManager.LoadScene("Login");
     }
@@ -41,6 +40,7 @@ public class GUI : MonoBehaviour {
         // rip there's homework
         Vector3 cPos = new Vector3(0f - 270f, 160f - 430f, 0f);
         foreach (TaskItem task in tasks) {
+            Debug.Log("Added " + task.Task);
             GameObject obj = Instantiate(taskPrefab, viewContent.transform);
             obj.transform.position = cPos;
             GameObject[] children = new GameObject[obj.transform.childCount];
@@ -92,6 +92,7 @@ public class GUI : MonoBehaviour {
             }
             cPos.y -= distanceBetweenTasks;
         }
+        
     }
 
     public void UpdatedViewport() {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,32 +15,22 @@ using Color = System.Drawing.Color;
 
 namespace HomeworkTrackerClient {
     public class APIShit {
-        private static string username;
-        private static string password;
-        public static Version apiVer = new Version(0, 4, 0);
+        public static string token = "";
+        public static Version apiVer = new Version(0, 5, 0);
         
         public static string Url = "http://homeworktrack.serble.net:9898/api";
-
-        public static void SetUsernameAndPassword(string username, string password) {
-            APIShit.username = username;
-            APIShit.password = Hash(password);
-        }
-        
-        public static void SetUsernameAndPasswordHash(string username, string password) {
-            APIShit.username = username;
-            APIShit.password = password;
-        }
 
         private static Response SendSimpleRequest(Dictionary<string, string> dick) {
             string contentString = JsonConvert.SerializeObject(dick);
             NativeArray<char> result = new NativeArray<char>(8192, Allocator.TempJob);
             NativeArray<char> contentData = new NativeArray<char>(contentString.Length, Allocator.TempJob);
+            
             for (int i = 0; i < contentString.Length; i++) {
                 contentData[i] = contentString[i];
             }
             SimpleRequestJob jobData = new SimpleRequestJob {
                 contentCa = contentData,
-                result = result
+                result = result,
             };
 
             // Schedule the job
@@ -87,8 +78,6 @@ namespace HomeworkTrackerClient {
         }
         
         private static Response SendRequest(Dictionary<string, string> dick) {
-            dick.Add("username", username);
-            dick.Add("password", password);
             dick.Add("version", apiVer.ToString());
             
             return SendSimpleRequest(dick);
@@ -113,14 +102,20 @@ namespace HomeworkTrackerClient {
             return Version.Parse(SendRequest(dick).content);
         }
 
-        public static Response SendRegisterRequest() {
-            Dictionary<string, string> dick = new Dictionary<string, string> { { "requestType", "register" } };
+        public static Response SendRegisterRequest(string username, string password) {
+            Dictionary<string, string> dick = new Dictionary<string, string> { { "requestType", "register" }, {"username", username}, {"password", password} };
 
             return SendRequest(dick);
         }
         
         public static Response SendCheckLoginRequest() {
             Dictionary<string, string> dick = new Dictionary<string, string> { { "requestType", "checkLogin" } };
+
+            return SendRequest(dick);
+        }
+        
+        public static Response SendLoginRequest(string username, string password) {
+            Dictionary<string, string> dick = new Dictionary<string, string> { {"requestType", "login"}, {"username", username}, {"password", password} };
 
             return SendRequest(dick);
         }
@@ -214,12 +209,7 @@ namespace HomeworkTrackerClient {
             code = (int)c2;
         }
     }
-    
-    public struct ResponseCA {
-        public char[] content;
-        public int code;
-    }
-    
+
     public struct SimpleRequestJob : IJob {
         public NativeArray<char> result;
         public NativeArray<char> contentCa;
@@ -229,8 +219,11 @@ namespace HomeworkTrackerClient {
             foreach (char reqChar in contentCa) {
                 str.Append(reqChar);
             }
+
             StringContent data = new StringContent(str.ToString(), Encoding.UTF8, "text/html");
             HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Add("x-api-token", APIShit.token.Replace(".", "!"));
+            client.DefaultRequestHeaders.Add("User-Agent", "Homework Tracker Unity Client By CoPokBl");
 
             HttpResponseMessage response = client.PostAsync(APIShit.Url, data).Result;
             string hresult = response.Content.ReadAsStringAsync().Result;
