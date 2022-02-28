@@ -38,8 +38,11 @@ public class GUI : MonoBehaviour {
         }
         
         // rip there's homework
-        Vector3 cPos = new Vector3(0f - 270f, 160f - 430f, 0f);
+        Vector3 cPos = new Vector3(0f, 160f - 430f, 0f);
         foreach (TaskItem task in tasks) {
+            Vector3 position = viewContent.transform.position;
+            position = new Vector3(position.x, position.y - 10000, position.z);
+            viewContent.transform.position = position;
             Debug.Log("Added " + task.Task);
             GameObject obj = Instantiate(taskPrefab, viewContent.transform);
             obj.transform.position = cPos;
@@ -90,21 +93,19 @@ public class GUI : MonoBehaviour {
                         break;
                 }
             }
-            cPos.y -= distanceBetweenTasks;
+            // cPos.y -= distanceBetweenTasks;
         }
         
     }
 
     public void UpdatedViewport() {
-        Debug.Log(viewport.verticalNormalizedPosition);
-        if (viewport.verticalNormalizedPosition == 1f) {
-            Canvas.ForceUpdateCanvases();
-            viewport.verticalNormalizedPosition = 0.5f;
-            Canvas.ForceUpdateCanvases();
-        }
-        // if (viewport.verticalNormalizedPosition < maxScrollDown) {
-        //     viewport.verticalNormalizedPosition = 0f;
+        // Debug.Log(viewport.verticalNormalizedPosition);
+        // if (viewport.verticalNormalizedPosition == 1f) {
+        //     Canvas.ForceUpdateCanvases();
+        //     viewport.verticalNormalizedPosition = 0.5f;
+        //     Canvas.ForceUpdateCanvases();
         // }
+        
     }
 
     public void AddTask() {
