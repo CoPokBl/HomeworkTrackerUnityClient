@@ -60,6 +60,7 @@
      <Compile Include="Assets\Scripts\API\ColouredString.cs" />
      <Compile Include="Assets\Scripts\API\APIShit.cs" />
      <Compile Include="Assets\Scripts\AddTask.cs" />
+     <Compile Include="Assets\Scripts\FileLogging.cs" />
  <Reference Include="UnityEngine">
  <HintPath>/home/copokbl/Unity/Hub/Editor/2020.3.30f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
  </Reference>

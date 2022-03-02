@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Networking;
 using Color = System.Drawing.Color;
 
 namespace HomeworkTrackerClient {
@@ -20,130 +21,99 @@ namespace HomeworkTrackerClient {
         
         public static string Url = "http://homeworktrack.serble.net:9898/api";
 
-        private static Response SendSimpleRequest(Dictionary<string, string> dick) {
+        public static UnityWebRequest CreateRequest(string type, Dictionary<string, string> dick) {
+            dick.Add("requestType", type);
+            UnityWebRequest req = UnityWebRequest.Post(Url, JsonConvert.SerializeObject(dick));
+            req.SetRequestHeader("x-api-token", token);
+            req.SetRequestHeader("User-Agent", "Homework Tracker Unity Client By CoPokBl");
+            return req;
+        }
+
+        private static void SendSimpleRequest(Dictionary<string, string> dick, Action<AsyncOperation> callback) {
             string contentString = JsonConvert.SerializeObject(dick);
-            NativeArray<char> result = new NativeArray<char>(8192, Allocator.TempJob);
-            NativeArray<char> contentData = new NativeArray<char>(contentString.Length, Allocator.TempJob);
+            FileLogging.Debug("Sending Request: " + contentString);
+
+            // FINALLY
+            UnityWebRequest req = UnityWebRequest.Post(Url, contentString);
+            req.SetRequestHeader("x-api-token", token);
+            req.SetRequestHeader("User-Agent", "Homework Tracker Unity Client By CoPokBl");
+            UnityWebRequestAsyncOperation asyncOperation = req.SendWebRequest();
+            asyncOperation.completed += callback;
             
-            for (int i = 0; i < contentString.Length; i++) {
-                contentData[i] = contentString[i];
-            }
-            SimpleRequestJob jobData = new SimpleRequestJob {
-                contentCa = contentData,
-                result = result,
-            };
-
-            // Schedule the job
-            JobHandle handle = jobData.Schedule();
-
-            // Wait for the job to complete
-            handle.Complete();
-
-            // All copies of the NativeArray point to the same memory, you can access the result in "your" copy of the NativeArray
-            char[] codeChars = new char[3];
-            for (int i = 0; i < 3; i++) {
-                codeChars[i] = result[i];
-            }
-            char[] responseChars = new char[result.Length - 3];
-            int j = 0;
-
-            for (int i = 3; i < result.Length-2; i++) {
-                responseChars[j] = result[i];
-                j++;
-            }
-            StringBuilder codeStrBuild = new StringBuilder();
-            foreach (char codeStrChar in codeChars) {
-                codeStrBuild.Append(codeStrChar);
-            }
-            StringBuilder contentStrBuild = new StringBuilder();
-            foreach (char contentStrChar in responseChars) {
-                contentStrBuild.Append(contentStrChar);
-            }
-            int code = int.Parse(codeStrBuild.ToString());
-            Response normalRes = new Response {
-                code = code,
-                content = contentStrBuild.ToString()
-            };
-            
-            Debug.Log("Code: " + normalRes.code);
-            Debug.Log("Content: " + normalRes.content);
-            
-
-            // Free the memory allocated by the result array
-            result.Dispose();
-            contentData.Dispose();
-            
-            // Return the result
-            return normalRes;
+            // Response normalRes = new Response {
+            //     code = (int) req.responseCode,
+            //     content = req.downloadHandler.text
+            // };
+            //
+            // FileLogging.Info("Request Result:");
+            // FileLogging.Info("Code: " + normalRes.code);
+            // FileLogging.Info("Content: " + normalRes.content);
         }
         
-        private static Response SendRequest(Dictionary<string, string> dick) {
+        private static void SendRequest(Dictionary<string, string> dick, Action<AsyncOperation> callback) {
             dick.Add("version", apiVer.ToString());
             
-            return SendSimpleRequest(dick);
+            SendSimpleRequest(dick, callback);
         }
         
-        public static bool SendPingRequest() {
+        public static void SendPingRequest(Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> { { "requestType", "ping" } };
             Response res;
             try {
-                res = SendSimpleRequest(dick);
+                SendSimpleRequest(dick, callback);
             } catch (Exception e) {
                 Debug.LogError(e);
-                return false;
             }
-            
-            return res.code == 200;
         }
         
-        public static Version SendGetVerRequest() {
+        public static void SendGetVerRequest(Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> { { "requestType", "getVersion" } };
 
-            return Version.Parse(SendRequest(dick).content);
+            SendRequest(dick, callback);
         }
 
-        public static Response SendRegisterRequest(string username, string password) {
+        public static void SendRegisterRequest(string username, string password, Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> { { "requestType", "register" }, {"username", username}, {"password", password} };
 
-            return SendRequest(dick);
+            SendRequest(dick, callback);
         }
         
-        public static Response SendCheckLoginRequest() {
+        public static void SendCheckLoginRequest(Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> { { "requestType", "checkLogin" } };
 
-            return SendRequest(dick);
+            SendRequest(dick, callback);
         }
         
-        public static Response SendLoginRequest(string username, string password) {
+        public static void SendLoginRequest(string username, string password, Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> { {"requestType", "login"}, {"username", username}, {"password", password} };
 
-            return SendRequest(dick);
+            SendRequest(dick, callback);
         }
         
-        public static List<TaskItem> SendGetTasksRequest() {
+        public static void SendGetTasksRequest(Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> { { "requestType", "getTasks" } };
 
-            Response tasksResponse = SendRequest(dick);
-            List<Dictionary<string, string>> ucons = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(tasksResponse.content);
-            List<TaskItem> outp = new List<TaskItem>();
-
-            foreach (var ucon in ucons) {
-                TaskItem item = new TaskItem(ucon["task"],
-                    new ColouredString(ucon["class"], ColorFromStr(ucon["classColour"])),
-                    new ColouredString(ucon["type"], ColorFromStr(ucon["typeColour"])),
-                    ucon["id"]);
-
-                if (ucon["dueDate"] != "0") {
-                    item.dueDate = DateTime.FromBinary(long.Parse(ucon["dueDate"]));
-                }
-
-                outp.Add(item);
-            }
-
-            return outp;
+            SendRequest(dick, callback);
+            // List<Dictionary<string, string>> ucons = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(tasksResponse.content);
+            // List<TaskItem> outp = new List<TaskItem>();
+            //
+            // foreach (var ucon in ucons) {
+            //     TaskItem item = new TaskItem(ucon["task"],
+            //         new ColouredString(ucon["class"], ColorFromStr(ucon["classColour"])),
+            //         new ColouredString(ucon["type"], ColorFromStr(ucon["typeColour"])),
+            //         ucon["id"]);
+            //
+            //     if (ucon["dueDate"] != "0") {
+            //         item.dueDate = DateTime.FromBinary(long.Parse(ucon["dueDate"]));
+            //     }
+            //
+            //     outp.Add(item);
+            // }
+            //
+            // return outp;
         }
         
-        public static Response SendSetTasksRequest(ColouredString classText, string task, ColouredString type, DateTime due) {
+        public static void SendSetTasksRequest(ColouredString classText, string task, ColouredString type, DateTime due, Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> {
                 { "requestType", "addTask" },
                 { "task", task },
@@ -154,10 +124,10 @@ namespace HomeworkTrackerClient {
                 { "dueDate", due.ToBinary().ToString() }
             };
 
-            return SendRequest(dick);
+            SendRequest(dick, callback);
         }
         
-        public static Response SendEditTaskRequest(string id, string field, string newValue) {
+        public static void SendEditTaskRequest(string id, string field, string newValue, Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> {
                 { "requestType", "editTask" },
                 { "id", id },
@@ -165,16 +135,16 @@ namespace HomeworkTrackerClient {
                 { "value", newValue }
             };
 
-            return SendRequest(dick);
+            SendRequest(dick, callback);
         }
         
-        public static Response SendDeleteTaskRequest(string id) {
+        public static void SendDeleteTaskRequest(string id, Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> {
                 { "requestType", "removeTask" },
                 { "id", id }
             };
 
-            return SendRequest(dick);
+            SendRequest(dick, callback);
         }
 
         public static string Hash(string str) {
@@ -209,35 +179,5 @@ namespace HomeworkTrackerClient {
             code = (int)c2;
         }
     }
-
-    public struct SimpleRequestJob : IJob {
-        public NativeArray<char> result;
-        public NativeArray<char> contentCa;
-
-        public void Execute() {
-            StringBuilder str = new StringBuilder();
-            foreach (char reqChar in contentCa) {
-                str.Append(reqChar);
-            }
-
-            StringContent data = new StringContent(str.ToString(), Encoding.UTF8, "text/html");
-            HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Add("x-api-token", APIShit.token.Replace(".", "!"));
-            client.DefaultRequestHeaders.Add("User-Agent", "Homework Tracker Unity Client By CoPokBl");
-
-            HttpResponseMessage response = client.PostAsync(APIShit.Url, data).Result;
-            string hresult = response.Content.ReadAsStringAsync().Result;
-
-            char[] codeChars = ((int)response.StatusCode).ToString().ToCharArray();
-            for (int i = 0; i < 3; i++) {
-                result[i] = codeChars[i];
-            }
-            char[] responseChars = hresult.ToCharArray();
-            int j = 0;
-            for (int i = 3; i < hresult.Length+3; i++) {
-                result[i] = responseChars[j];
-                j++;
-            }
-        }
-    }
+    
 }
