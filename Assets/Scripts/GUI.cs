@@ -1,9 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using HomeworkTrackerClient;
 using HomeworkTrackerServer;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -17,10 +20,22 @@ public class GUI : MonoBehaviour {
     public int maxScrollDown;
     public GameObject viewContent;
 
+    private bool hasSnapped = false;
+    private bool hasFinishedLoadingTasks = false;
+
     public void Logout() {
         PlayerPrefs.DeleteKey("token");
         PlayerPrefs.Save();
         SceneManager.LoadScene("Login");
+    }
+
+    private void FixedUpdate() {
+        if (hasSnapped || !hasFinishedLoadingTasks) return;
+        Vector3 position = viewContent.transform.position;
+        position = new Vector3(position.x, position.y - 10000, position.z);
+        viewContent.transform.position = position;
+        hasSnapped = true;
+        Debug.Log("Snapped view");
     }
 
     private void Start() {
@@ -29,20 +44,26 @@ public class GUI : MonoBehaviour {
     }
 
     public void LoadTasks() {
-        List<TaskItem> tasks = APIShit.SendGetTasksRequest();
+        StartCoroutine(LoadTasksCo());
+    }
+
+    public IEnumerator LoadTasksCo() {
+        UnityWebRequest getTasksReq = APIShit.CreateRequest("api/tasks", APIShit.HttpVerb.GET);
+        yield return getTasksReq.SendWebRequest();
+
+        string result = getTasksReq.downloadHandler.text;
+        Debug.Log("Tasks Data Received: " + result);
+        List<TaskItem> tasks = APIShit.GetTasksResultToList(result);
 
         if (tasks.Count == 0) {
             // no homework :)
             noHomework.enabled = true;
-            return;
+            yield break;
         }
         
         // rip there's homework
         Vector3 cPos = new Vector3(0f, 160f - 430f, 0f);
         foreach (TaskItem task in tasks) {
-            Vector3 position = viewContent.transform.position;
-            position = new Vector3(position.x, position.y - 10000, position.z);
-            viewContent.transform.position = position;
             Debug.Log("Added " + task.Task);
             GameObject obj = Instantiate(taskPrefab, viewContent.transform);
             obj.transform.position = cPos;
@@ -95,16 +116,10 @@ public class GUI : MonoBehaviour {
             }
             // cPos.y -= distanceBetweenTasks;
         }
-        
-    }
 
-    public void UpdatedViewport() {
-        // Debug.Log(viewport.verticalNormalizedPosition);
-        // if (viewport.verticalNormalizedPosition == 1f) {
-        //     Canvas.ForceUpdateCanvases();
-        //     viewport.verticalNormalizedPosition = 0.5f;
-        //     Canvas.ForceUpdateCanvases();
-        // }
+        if (tasks.Count != 0) {
+            hasFinishedLoadingTasks = true;
+        }
         
     }
 

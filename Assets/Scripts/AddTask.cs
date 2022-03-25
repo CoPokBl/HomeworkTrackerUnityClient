@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using HomeworkTrackerClient;
 using HomeworkTrackerServer;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -21,6 +22,10 @@ public class AddTask : MonoBehaviour {
     public InputField dueDateY;
 
     public void AddTaskFunc() {
+        StartCoroutine(AddTaskFuncCo());
+    }
+
+    private IEnumerator AddTaskFuncCo() {
         Color cColour = Color.FromName(classColour.options[classColour.value].text.ToLower());
         if (classColour.value == 0) {
             cColour = Color.Empty;
@@ -42,7 +47,7 @@ public class AddTask : MonoBehaviour {
                 dueDateY.text = now.Year.ToString();
                 dueDateM.text = now.Month.ToString();
                 dueDateD.text = now.Day.ToString();
-                return;
+                yield break;
             }
         }
         
@@ -53,9 +58,21 @@ public class AddTask : MonoBehaviour {
             dueDate = due
         };
 
-        if (APIShit.SendSetTasksRequest(item.Class, item.Task, item.Type, due).code != 200) {
+        UnityWebRequest addTaskReq = APIShit.CreateRequest("api/tasks", APIShit.HttpVerb.PUT, new Dictionary<string, string> {
+            { "class", item.Class.Text },
+            { "classColour", APIShit.StrFromColor(item.Class.Color) },
+            
+            { "type", item.Type.Text },
+            { "typeColour", APIShit.StrFromColor(item.Type.Color) },
+            
+            { "task", item.Task },
+            
+            { "dueDate", item.dueDate.ToBinary().ToString() },
+        });
+        yield return addTaskReq.SendWebRequest();
+        if (addTaskReq.responseCode != 201) {
             // error
-            Debug.LogError("Failed to add item");
+            Debug.LogError("Failed to add item: " + addTaskReq.responseCode + addTaskReq.downloadHandler.text);
         }
 
         SceneManager.LoadScene("GUI");

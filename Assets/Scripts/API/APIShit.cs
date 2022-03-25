@@ -19,13 +19,60 @@ namespace HomeworkTrackerClient {
         public static string token = "";
         public static Version apiVer = new Version(0, 5, 0);
         
-        public static string Url = "http://homeworktrack.serble.net:9898/api";
+        public static string Url = "http://homeworktrack.serble.net:9898/";
 
-        public static UnityWebRequest CreateRequest(string type, Dictionary<string, string> dick) {
-            dick.Add("requestType", type);
-            UnityWebRequest req = UnityWebRequest.Post(Url, JsonConvert.SerializeObject(dick));
-            req.SetRequestHeader("x-api-token", token);
+        public enum Auth { None, Token, Basic }
+        // create enum for http verbs
+        public enum HttpVerb { GET, POST, PUT, DELETE }
+
+        public static UnityWebRequest CreateRequest(string path, HttpVerb verb, Dictionary<string, string> dick, Auth auth = Auth.Token, string usrPwd = "") {
+            string reqContent = JsonConvert.SerializeObject(dick);
+            return CreateRequest(path, verb, reqContent, auth, usrPwd);
+        }
+        
+        // create overload for CreateRequest that has a string instead of a dictionary
+        public static UnityWebRequest CreateRequest(string path, HttpVerb verb, string dick = "", Auth auth = Auth.Token, string usrPwd = "") {
+            
+            // add debug message
+            Debug.Log($"Creating {verb.ToString()} request for {path} with content {dick} and auth {auth.ToString()}");
+            
+            byte[] reqContent = Encoding.UTF8.GetBytes(dick);
+
+            // create a switch for all the http verbs
+            UnityWebRequest req;
+            switch (verb) {
+                case HttpVerb.GET:
+                    req = UnityWebRequest.Get(Url + path);
+                    break;
+                case HttpVerb.POST:
+                    req = UnityWebRequest.Post(Url + path, dick);
+                    break;
+                case HttpVerb.PUT:
+                    req = UnityWebRequest.Put(Url + path, dick);
+                    break;
+                case HttpVerb.DELETE:
+                    req = UnityWebRequest.Delete(Url + path);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(verb), verb, null);
+            }
+            
+            // set content type is uploadhandler is set
+            if (req.uploadHandler != null) {
+                req.uploadHandler.contentType = "application/json";
+            }
+
+            switch (auth) {
+                // set header Authorization to auth type
+                case Auth.Token:
+                    req.SetRequestHeader("Authorization", "Bearer " + token);
+                    break;
+                case Auth.Basic:
+                    req.SetRequestHeader("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(usrPwd)));
+                    break;
+            }
             req.SetRequestHeader("User-Agent", "Homework Tracker Unity Client By CoPokBl");
+            req.timeout = 10;
             return req;
         }
 
@@ -34,7 +81,7 @@ namespace HomeworkTrackerClient {
             FileLogging.Debug("Sending Request: " + contentString);
 
             // FINALLY
-            UnityWebRequest req = UnityWebRequest.Post(Url, contentString);
+            UnityWebRequest req = UnityWebRequest.Put(Url, contentString);
             req.SetRequestHeader("x-api-token", token);
             req.SetRequestHeader("User-Agent", "Homework Tracker Unity Client By CoPokBl");
             UnityWebRequestAsyncOperation asyncOperation = req.SendWebRequest();
@@ -58,7 +105,6 @@ namespace HomeworkTrackerClient {
         
         public static void SendPingRequest(Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> { { "requestType", "ping" } };
-            Response res;
             try {
                 SendSimpleRequest(dick, callback);
             } catch (Exception e) {
@@ -90,27 +136,25 @@ namespace HomeworkTrackerClient {
             SendRequest(dick, callback);
         }
         
-        public static void SendGetTasksRequest(Action<AsyncOperation> callback) {
-            Dictionary<string, string> dick = new Dictionary<string, string> { { "requestType", "getTasks" } };
+        public static List<TaskItem> GetTasksResultToList(string text) {
+            List<Dictionary<string, string>> ucons = 
+                JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(text);
+            List<TaskItem> tasks = new List<TaskItem>();
+        
+            foreach (var ucon in ucons) {
+                TaskItem item = new TaskItem(ucon["task"],
+                    new ColouredString(ucon["class"], APIShit.ColorFromStr(ucon["classColour"])),
+                    new ColouredString(ucon["type"], APIShit.ColorFromStr(ucon["typeColour"])),
+                    ucon["id"]);
+        
+                if (ucon["dueDate"] != "0") {
+                    item.dueDate = DateTime.FromBinary(long.Parse(ucon["dueDate"]));
+                }
+        
+                tasks.Add(item);
+            }
 
-            SendRequest(dick, callback);
-            // List<Dictionary<string, string>> ucons = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(tasksResponse.content);
-            // List<TaskItem> outp = new List<TaskItem>();
-            //
-            // foreach (var ucon in ucons) {
-            //     TaskItem item = new TaskItem(ucon["task"],
-            //         new ColouredString(ucon["class"], ColorFromStr(ucon["classColour"])),
-            //         new ColouredString(ucon["type"], ColorFromStr(ucon["typeColour"])),
-            //         ucon["id"]);
-            //
-            //     if (ucon["dueDate"] != "0") {
-            //         item.dueDate = DateTime.FromBinary(long.Parse(ucon["dueDate"]));
-            //     }
-            //
-            //     outp.Add(item);
-            // }
-            //
-            // return outp;
+            return tasks;
         }
         
         public static void SendSetTasksRequest(ColouredString classText, string task, ColouredString type, DateTime due, Action<AsyncOperation> callback) {
