@@ -1,24 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using API;
 using HomeworkTrackerClient;
-using HomeworkTrackerServer;
-using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Color = System.Drawing.Color;
 
 public class GUI : MonoBehaviour {
-    public ScrollRect viewport;
     public Text noHomework;
     public GameObject taskPrefab;
-    public int distanceBetweenTasks;
-    [FormerlySerializedAs("maxTasksOnScreen")] public int maxScrollUp;
-    public int maxScrollDown;
     public GameObject viewContent;
+    public Button refreshButton;
+    public Text refreshButtonText;
 
     private bool hasSnapped = false;
     private bool hasFinishedLoadingTasks = false;
@@ -48,6 +44,8 @@ public class GUI : MonoBehaviour {
     }
 
     public IEnumerator LoadTasksCo() {
+        refreshButton.interactable = false;
+        refreshButtonText.text = "Loading...";
         UnityWebRequest getTasksReq = APIShit.CreateRequest("api/tasks", APIShit.HttpVerb.GET);
         yield return getTasksReq.SendWebRequest();
 
@@ -57,6 +55,8 @@ public class GUI : MonoBehaviour {
 
         if (tasks.Count == 0) {
             // no homework :)
+            refreshButton.interactable = true;
+            refreshButtonText.text = "Refresh";
             noHomework.enabled = true;
             yield break;
         }
@@ -78,6 +78,7 @@ public class GUI : MonoBehaviour {
                         Debug.LogError("Child of task object '" + child.name + "' shouldn't exist");
                         break;
                     
+                    case "edit":
                     case "delete":
                     case "Back":
                         // I don't want it to display an error when it gets this
@@ -86,15 +87,15 @@ public class GUI : MonoBehaviour {
                     case "Class":
                         Text classTxt = child.GetComponent<Text>();
                         classTxt.text = task.Class.Text;
-                        System.Drawing.Color cs = task.Class.Color;
-                        classTxt.color = new Color(cs.R, cs.G, cs.B, cs.A);
+                        Color cs = task.Class.Color;
+                        classTxt.color = new UnityEngine.Color(cs.R, cs.G, cs.B, cs.A);
                         break;
                     
                     case "Type":
                         Text typeTxt = child.GetComponent<Text>();
                         typeTxt.text = task.Type.Text;
-                        System.Drawing.Color ts = task.Type.Color;
-                        typeTxt.color = new Color(ts.R, ts.G, ts.B, ts.A);
+                        Color ts = task.Type.Color;
+                        typeTxt.color = new UnityEngine.Color(ts.R, ts.G, ts.B, ts.A);
                         break;
                     
                     case "Task":
@@ -106,6 +107,15 @@ public class GUI : MonoBehaviour {
                         Text dueTxt = child.GetComponent<Text>();
                         dueTxt.text = task.dueDate == DateTime.MaxValue 
                             ? "No Due Date" : $"Due: {task.dueDate.Year}/{task.dueDate.Month}/{task.dueDate.Day}";
+                        if (DateTime.Now > task.dueDate) {
+                            dueTxt.color = UnityEngine.Color.red;
+                        }
+                        else if (DateTime.Now.AddDays(5) > task.dueDate) {
+                            dueTxt.color = UnityEngine.Color.yellow;
+                        } else {
+                            dueTxt.color = UnityEngine.Color.black;
+                        }
+
                         break;
                     
                     case "ID":
@@ -114,12 +124,14 @@ public class GUI : MonoBehaviour {
                         break;
                 }
             }
-            // cPos.y -= distanceBetweenTasks;
         }
 
         if (tasks.Count != 0) {
             hasFinishedLoadingTasks = true;
         }
+        
+        refreshButton.interactable = true;
+        refreshButtonText.text = "Refresh";
         
     }
 

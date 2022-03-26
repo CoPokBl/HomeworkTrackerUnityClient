@@ -1,24 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using HomeworkTrackerServer;
+using API;
 using Newtonsoft.Json;
-using Unity.Collections;
-using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Networking;
 using Color = System.Drawing.Color;
 
 namespace HomeworkTrackerClient {
-    public class APIShit {
-        public static string token = "";
-        public static Version apiVer = new Version(0, 5, 0);
-        
+    public static class APIShit {
+        public static string Token = "";
+        public static readonly Version APIVer = new Version(0, 5, 0);
+
         public static string Url = "http://homeworktrack.serble.net:9898/";
 
         public enum Auth { None, Token, Basic }
@@ -42,16 +38,16 @@ namespace HomeworkTrackerClient {
             UnityWebRequest req;
             switch (verb) {
                 case HttpVerb.GET:
-                    req = UnityWebRequest.Get(Url + path);
+                    req = UnityWebRequest.Get($"{Url}/{path}");
                     break;
                 case HttpVerb.POST:
-                    req = UnityWebRequest.Post(Url + path, dick);
+                    req = UnityWebRequest.Post($"{Url}/{path}", dick);
                     break;
                 case HttpVerb.PUT:
-                    req = UnityWebRequest.Put(Url + path, dick);
+                    req = UnityWebRequest.Put($"{Url}/{path}", dick);
                     break;
                 case HttpVerb.DELETE:
-                    req = UnityWebRequest.Delete(Url + path);
+                    req = UnityWebRequest.Delete($"{Url}/{path}");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(verb), verb, null);
@@ -65,7 +61,7 @@ namespace HomeworkTrackerClient {
             switch (auth) {
                 // set header Authorization to auth type
                 case Auth.Token:
-                    req.SetRequestHeader("Authorization", "Bearer " + token);
+                    req.SetRequestHeader("Authorization", "Bearer " + Token);
                     break;
                 case Auth.Basic:
                     req.SetRequestHeader("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(usrPwd)));
@@ -82,23 +78,14 @@ namespace HomeworkTrackerClient {
 
             // FINALLY
             UnityWebRequest req = UnityWebRequest.Put(Url, contentString);
-            req.SetRequestHeader("x-api-token", token);
+            req.SetRequestHeader("x-api-token", Token);
             req.SetRequestHeader("User-Agent", "Homework Tracker Unity Client By CoPokBl");
             UnityWebRequestAsyncOperation asyncOperation = req.SendWebRequest();
             asyncOperation.completed += callback;
-            
-            // Response normalRes = new Response {
-            //     code = (int) req.responseCode,
-            //     content = req.downloadHandler.text
-            // };
-            //
-            // FileLogging.Info("Request Result:");
-            // FileLogging.Info("Code: " + normalRes.code);
-            // FileLogging.Info("Content: " + normalRes.content);
         }
         
         private static void SendRequest(Dictionary<string, string> dick, Action<AsyncOperation> callback) {
-            dick.Add("version", apiVer.ToString());
+            dick.Add("version", APIVer.ToString());
             
             SendSimpleRequest(dick, callback);
         }
@@ -157,19 +144,19 @@ namespace HomeworkTrackerClient {
             return tasks;
         }
         
-        public static void SendSetTasksRequest(ColouredString classText, string task, ColouredString type, DateTime due, Action<AsyncOperation> callback) {
-            Dictionary<string, string> dick = new Dictionary<string, string> {
-                { "requestType", "addTask" },
-                { "task", task },
-                { "class", classText.Text },
-                { "classColour", StrFromColor(classText.Color) },
-                { "type", type.Text },
-                { "typeColour", StrFromColor(type.Color) },
-                { "dueDate", due.ToBinary().ToString() }
-            };
-
-            SendRequest(dick, callback);
-        }
+        // public static void SendSetTasksRequest(ColouredString classText, string task, ColouredString type, DateTime due, Action<AsyncOperation> callback) {
+        //     Dictionary<string, string> dick = new Dictionary<string, string> {
+        //         { "requestType", "addTask" },
+        //         { "task", task },
+        //         { "class", classText.Text },
+        //         { "classColour", StrFromColor(classText.Color) },
+        //         { "type", type.Text },
+        //         { "typeColour", StrFromColor(type.Color) },
+        //         { "dueDate", due.ToBinary().ToString() }
+        //     };
+        //
+        //     SendRequest(dick, callback);
+        // }
         
         public static void SendEditTaskRequest(string id, string field, string newValue, Action<AsyncOperation> callback) {
             Dictionary<string, string> dick = new Dictionary<string, string> {
@@ -206,7 +193,7 @@ namespace HomeworkTrackerClient {
             }
 
             string[] strs = str.Split('.');
-            return Color.FromArgb(255, Convert.ToInt32(strs[0]), Convert.ToInt32(strs[1]), Convert.ToInt32(strs[2]));
+            return Color.FromArgb(Convert.ToInt32(strs[0]), Convert.ToInt32(strs[1]), Convert.ToInt32(strs[2]));
         }
         
         public static string StrFromColor(Color col) {

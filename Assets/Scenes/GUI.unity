@@ -572,13 +572,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdbe9d04e8f9b7ed392ef6ee594afca1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewport: {fileID: 646174194}
   noHomework: {fileID: 1406503551}
   taskPrefab: {fileID: 3641205249423291524, guid: ab4bd3666818ba1f8bad3097d76ddf42, type: 3}
-  distanceBetweenTasks: 10000
-  maxScrollUp: 10
-  maxScrollDown: 10
   viewContent: {fileID: 2084089608}
+  refreshButton: {fileID: 1383341867}
+  refreshButtonText: {fileID: 1927350077}
 --- !u!1 &1176141990
 GameObject:
   m_ObjectHideFlags: 0

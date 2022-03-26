@@ -1,6 +1,6 @@
 using System;
 
-namespace HomeworkTrackerServer {
+namespace API {
     public class TaskItem {
         public string Task;
         public ColouredString Class;

@@ -1,6 +1,6 @@
 using System.Drawing;
 
-namespace HomeworkTrackerServer {
+namespace API {
     public class ColouredString {
         public string Text;
         public Color Color;

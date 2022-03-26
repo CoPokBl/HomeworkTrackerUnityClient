@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/AddTask.unity
     guid: f974a2323bea290c19caaef62de87f9d
+  - enabled: 1
+    path: Assets/Scenes/EditTask.unity
+    guid: 989edd78d5acfe2b39bba5a4b29b9ba2
   m_configObjects: {}

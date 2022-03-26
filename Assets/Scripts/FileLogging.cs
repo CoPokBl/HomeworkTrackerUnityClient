@@ -19,6 +19,7 @@ public class FileLogging {
             string ccontent = File.ReadAllText(_logFile);
             ccontent += $"[{DateTime.Now}] [{severity}]: {msg}\n";
             File.WriteAllText(_logFile, ccontent);
+            UnityEngine.Debug.Log($"[{DateTime.Now}] [{severity}]: {msg}");
             Console.WriteLine($"[{DateTime.Now}] [{severity}]: {msg}");
         }
     }

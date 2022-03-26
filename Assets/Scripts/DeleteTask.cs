@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using HomeworkTrackerClient;
 using UnityEngine;
 using UnityEngine.Networking;
