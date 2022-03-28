@@ -123,12 +123,13 @@ public class GUI : MonoBehaviour {
                     
                     case "DueDate":
                         Text dueTxt = child.GetComponent<Text>();
+                        DateTime localTime = task.dueDate.ToLocalTime();
                         dueTxt.text = task.dueDate == DateTime.MaxValue 
-                            ? "No Due Date" : $"Due: {task.dueDate.Year}/{task.dueDate.Month}/{task.dueDate.Day}";
-                        if (DateTime.Now > task.dueDate) {
+                            ? "No Due Date" : $"Due: {localTime.Year}/{localTime.Month}/{localTime.Day}";
+                        if (DateTime.UtcNow > task.dueDate) {
                             dueTxt.color = UnityEngine.Color.red;
                         }
-                        else if (DateTime.Now.AddDays(5) > task.dueDate) {
+                        else if (DateTime.UtcNow.AddDays(5) > task.dueDate) {
                             dueTxt.color = UnityEngine.Color.yellow;
                         } else {
                             dueTxt.color = UnityEngine.Color.black;
@@ -142,7 +143,6 @@ public class GUI : MonoBehaviour {
                         break;
                 }
             }
-            FileLogging.Debug($"Added {task.Task}");
         }
 
         if (tasks.Count != 0) {

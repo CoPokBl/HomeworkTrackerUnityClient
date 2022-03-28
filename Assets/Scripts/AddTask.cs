@@ -45,7 +45,7 @@ public class AddTask : MonoBehaviour {
         if (enableDueDate.isOn) {
             // do due date
             try {
-                due = new DateTime(int.Parse(dueDateY.text), int.Parse(dueDateM.text), int.Parse(dueDateD.text));
+                due = new DateTime(int.Parse(dueDateY.text), int.Parse(dueDateM.text), int.Parse(dueDateD.text)).ToUniversalTime();
             }
             catch (Exception) {
                 // invalid

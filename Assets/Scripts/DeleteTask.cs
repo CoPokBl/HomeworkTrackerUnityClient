@@ -15,9 +15,10 @@ public class DeleteTask : MonoBehaviour {
     private IEnumerator DeleteCo() {
         UnityWebRequest deleteReq = APIShit.CreateRequest("api/tasks/" + Id.text, APIShit.HttpVerb.Delete);
         yield return deleteReq.SendWebRequest();
-        if (deleteReq.responseCode != 200) {
+        if (deleteReq.responseCode != 204) {
             // failed
-            Debug.LogError("Failed to delete task");
+            FileLogging.Error("Failed to delete task: " + deleteReq.responseCode);
+            yield break;
         }
         SceneManager.LoadScene("GUI");
     }

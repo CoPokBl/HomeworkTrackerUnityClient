@@ -47,6 +47,7 @@ public class EditTask : MonoBehaviour {
         // DUE DATE
         if (ucon["dueDate"] != "0") {
             item.dueDate = DateTime.FromBinary(long.Parse(ucon["dueDate"]));
+            FileLogging.Debug("Due date kind: " + item.dueDate.Kind);
         }
 
         // || Set dropdown values ||
@@ -70,11 +71,11 @@ public class EditTask : MonoBehaviour {
         task.text = item.Task;
         
         // Set due date
-        enableDueDate.isOn = item.dueDate != null;
-        if (item.dueDate != null) {
-            dueDateD.text = item.dueDate.Day.ToString();
-            dueDateM.text = item.dueDate.Month.ToString();
-            dueDateY.text = item.dueDate.Year.ToString();
+        enableDueDate.isOn = item.dueDate != DateTime.MaxValue;
+        if (item.dueDate != DateTime.MaxValue) {
+            dueDateD.text = item.dueDate.ToLocalTime().Day.ToString();
+            dueDateM.text = item.dueDate.ToLocalTime().Month.ToString();
+            dueDateY.text = item.dueDate.ToLocalTime().Year.ToString();
         }
     }
     
@@ -105,7 +106,7 @@ public class EditTask : MonoBehaviour {
         if (enableDueDate.isOn) {
             // do due date
             try {
-                due = new DateTime(int.Parse(dueDateY.text), int.Parse(dueDateM.text), int.Parse(dueDateD.text));
+                due = new DateTime(int.Parse(dueDateY.text), int.Parse(dueDateM.text), int.Parse(dueDateD.text)).ToUniversalTime();
             }
             catch (Exception) {
                 // invalid
@@ -116,13 +117,15 @@ public class EditTask : MonoBehaviour {
                 yield break;
             }
         }
-        
+        FileLogging.Debug("Due date kind: " + due.Kind);
+
         // CREATE ITEM OBJECT FOR EASE OF ACCESS
         TaskItem item = new TaskItem {
             Class = new ColouredString(@class.text, cColour),  // CLASS
             Type = new ColouredString(type.text, tColour),     // TYPE
             Task = task.text,
-            dueDate = due
+            dueDate = due,
+            Id = Data.EditTaskId
         };
 
         // SEND ADD ITEM REQUEST TO SERVER, this is a put request so it will overwrite the old task
@@ -136,6 +139,8 @@ public class EditTask : MonoBehaviour {
             { "task", item.Task },
             
             { "dueDate", item.dueDate.ToBinary().ToString() },
+            
+            { "id", item.Id }
         });
         yield return addTaskReq.SendWebRequest();
         if (addTaskReq.responseCode != 201) {
