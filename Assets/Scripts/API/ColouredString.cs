@@ -1,5 +1,3 @@
-using System.Drawing;
-
 namespace API {
     public class ColouredString {
         public string Text;

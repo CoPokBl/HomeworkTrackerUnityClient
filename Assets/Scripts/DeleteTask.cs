@@ -1,5 +1,5 @@
 using System.Collections;
-using HomeworkTrackerClient;
+using API;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -13,7 +13,7 @@ public class DeleteTask : MonoBehaviour {
     }
 
     private IEnumerator DeleteCo() {
-        UnityWebRequest deleteReq = APIShit.CreateRequest("api/tasks/" + Id.text, APIShit.HttpVerb.DELETE);
+        UnityWebRequest deleteReq = APIShit.CreateRequest("api/tasks/" + Id.text, APIShit.HttpVerb.Delete);
         yield return deleteReq.SendWebRequest();
         if (deleteReq.responseCode != 200) {
             // failed

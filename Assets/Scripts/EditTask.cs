@@ -2,54 +2,74 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using API;
-using HomeworkTrackerClient;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Color = System.Drawing.Color;
-using UColor = UnityEngine.Color;
+using Color = API.Color;
 
 public class EditTask : MonoBehaviour {
     public InputField @class;
-    public Dropdown classColour;
+    public Dropdown   classColour;
     public InputField type;
-    public Dropdown typeColour;
+    public Dropdown   typeColour;
     public InputField task;
-    public Toggle enableDueDate;
+    public Toggle     enableDueDate;
     public InputField dueDateD;
     public InputField dueDateM;
     public InputField dueDateY;
 
     private void Start() {
-        StartCoroutine(StartCo());
+        try {
+            StartCoroutine(StartCo());
+        }
+        catch (Exception e) {
+            FileLogging.Error(e.ToString());
+            // Go back to main menu, if the error was a server problem then it will filter back to saying disconnected
+            SceneManager.LoadScene("GUI");
+        }
     }
 
     private IEnumerator StartCo() {
-        UnityWebRequest getTasksReq = APIShit.CreateRequest("api/tasks/" + Data.EditTaskId, APIShit.HttpVerb.GET);
+        FileLogging.Info("Obtaining task data to edit");
+        UnityWebRequest getTasksReq = APIShit.CreateRequest("api/tasks/" + Data.EditTaskId, APIShit.HttpVerb.Get);
         yield return getTasksReq.SendWebRequest();
 
         string result = getTasksReq.downloadHandler.text;
         FileLogging.Debug("Obtained task that they wanna edit: " + result);
         Dictionary<string, string> ucon = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
         TaskItem item = new TaskItem(ucon["task"],
-            new ColouredString(ucon["class"], APIShit.ColorFromStr(ucon["classColour"])),
-            new ColouredString(ucon["type"], APIShit.ColorFromStr(ucon["typeColour"])),
+            new ColouredString(ucon["class"], APIShit.ColorFromStr(ucon["classColour"])),  // CLASS COLOUR
+            new ColouredString(ucon["type"], APIShit.ColorFromStr(ucon["typeColour"])),   // TYPE COLOUR
             ucon["id"]);
         
+        // DUE DATE
         if (ucon["dueDate"] != "0") {
             item.dueDate = DateTime.FromBinary(long.Parse(ucon["dueDate"]));
         }
 
+        // || Set dropdown values ||
+        // CLASS COLOUR
+        int classColourValue = ColorToIntDropdown(item.Class.Color);
         @class.text = item.Class.Text;
-        classColour.value = ColorToIntDropdown(item.Class.Color);
+        classColour.value = classColourValue;
+        classColour.RefreshShownValue();
         
+        // TYPE COLOUR
+        int typeColourValue = ColorToIntDropdown(item.Type.Color);
         type.text = item.Type.Text;
-        typeColour.value = ColorToIntDropdown(item.Type.Color);
+        typeColour.value = typeColourValue;
+        typeColour.RefreshShownValue();
         
+        // Just some nice debugging
+        FileLogging.Debug("Class colour value: " + classColourValue);
+        FileLogging.Debug("Type colour value: " + typeColourValue);
+        
+        // Set task
         task.text = item.Task;
         
+        // Set due date
         enableDueDate.isOn = item.dueDate != null;
         if (item.dueDate != null) {
             dueDateD.text = item.dueDate.Day.ToString();
@@ -60,22 +80,27 @@ public class EditTask : MonoBehaviour {
     
     
     public void Save() {
-        StartCoroutine(AddTaskFuncCo());
+        try {
+            StartCoroutine(AddTaskFuncCo());
+        }
+        catch (Exception e) {
+            FileLogging.Error(e.ToString());
+        }
     }
 
     private IEnumerator AddTaskFuncCo() {
-        Color c = Color.Aqua;
         
-        
+        // COLOURS
         Color cColour = Color.FromName(classColour.options[classColour.value].text.ToLower());
         if (classColour.value == 0) {
-            cColour = System.Drawing.Color.Empty;
+            cColour = Color.Empty;
         }
-        System.Drawing.Color tColour = System.Drawing.Color.FromName(typeColour.options[typeColour.value].text.ToLower());
+        Color tColour = Color.FromName(typeColour.options[typeColour.value].text.ToLower());
         if (typeColour.value == 0) {
-            tColour = System.Drawing.Color.Empty;
+            tColour = Color.Empty;
         }
 
+        // DUE DATE
         DateTime due = DateTime.MaxValue;
         if (enableDueDate.isOn) {
             // do due date
@@ -92,16 +117,16 @@ public class EditTask : MonoBehaviour {
             }
         }
         
+        // CREATE ITEM OBJECT FOR EASE OF ACCESS
         TaskItem item = new TaskItem {
-            Class = new ColouredString(@class.text, cColour),
-            Type = new ColouredString(type.text, tColour),
+            Class = new ColouredString(@class.text, cColour),  // CLASS
+            Type = new ColouredString(type.text, tColour),     // TYPE
             Task = task.text,
             dueDate = due
         };
 
-        UnityWebRequest addTaskReq = APIShit.CreateRequest("api/tasks", APIShit.HttpVerb.PUT, new Dictionary<string, string> {
-            { "id", Data.EditTaskId },
-            
+        // SEND ADD ITEM REQUEST TO SERVER, this is a put request so it will overwrite the old task
+        UnityWebRequest addTaskReq = APIShit.CreateRequest("api/tasks", APIShit.HttpVerb.Put, new Dictionary<string, string> {
             { "class", item.Class.Text },
             { "classColour", APIShit.StrFromColor(item.Class.Color) },
             
@@ -115,24 +140,17 @@ public class EditTask : MonoBehaviour {
         yield return addTaskReq.SendWebRequest();
         if (addTaskReq.responseCode != 201) {
             // error
-            Debug.LogError("Failed to add item: " + addTaskReq.responseCode + addTaskReq.downloadHandler.text);
+            FileLogging.Error("Failed to put item: " + addTaskReq.responseCode + addTaskReq.downloadHandler.text);
         }
 
+        // Go back to the main menu
         SceneManager.LoadScene("GUI");
     }
-    
 
-    public UColor ToUnityColor(Color color) {
-        return new UColor(color.R, color.G, color.B);
-    }
-
-
-    // public int ColorToIntDropdown(UColor color) {
-    //     return ColorToIntDropdown(ToUnityColor(color));
-    // }
-
-    public int ColorToIntDropdown(Color color) {
+    // Convert colour to int for the value for the colour dropdowns
+    private int ColorToIntDropdown(Color color) {
         // black, blue, red, green, yellow, red, orange, purple, cyan, brown, lime, gold, grey, violet, deep pink
+        FileLogging.Debug("Color RGB: " + color.R + ", " + color.G + ", " + color.B);
         if (color == Color.Black) {
             return 0;
         }

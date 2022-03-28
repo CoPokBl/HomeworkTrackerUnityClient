@@ -64,6 +64,9 @@
      <Compile Include="Assets\Scripts\EditTask.cs" />
      <Compile Include="Assets\Scripts\API\APIShit.cs" />
      <Compile Include="Assets\Scripts\AddTask.cs" />
+     <Compile Include="Assets\Scripts\API\Color.cs" />
+     <Compile Include="Assets\Scripts\ErrorProtection.cs" />
+     <Compile Include="Assets\Scripts\Console.cs" />
  <Reference Include="UnityEngine">
  <HintPath>/home/copokbl/Unity/Hub/Editor/2020.3.32f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
  </Reference>
@@ -288,9 +291,6 @@
  </Reference>
  <Reference Include="Newtonsoft.Json">
  <HintPath>/media/copokbl/48CC9506CC94F004/Documents/Coding/C#/Unity/HomeworkTrackerUnityClient/Assets/Plugins/Newtonsoft.Json.dll</HintPath>
- </Reference>
- <Reference Include="System.Drawing">
- <HintPath>/media/copokbl/48CC9506CC94F004/Documents/Coding/C#/Unity/HomeworkTrackerUnityClient/Assets/System.Drawing.dll</HintPath>
  </Reference>
  <Reference Include="mscorlib">
  <HintPath>/home/copokbl/Unity/Hub/Editor/2020.3.32f1/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/mscorlib.dll</HintPath>

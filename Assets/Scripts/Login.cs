@@ -1,10 +1,11 @@
 using System;
 using System.Collections;
-using HomeworkTrackerClient;
+using API;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Color = UnityEngine.Color;
 
 public class Login : MonoBehaviour {
 
@@ -29,12 +30,18 @@ public class Login : MonoBehaviour {
         StartCoroutine(StartFuncCo());
     }
 
+    public void ResetPrefs() {
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+        SceneManager.LoadScene("Login");
+    }
+
     private IEnumerator StartFuncCo() {
 
         ip.text = PlayerPrefs.HasKey("ip") ? PlayerPrefs.GetString("ip") : "http://homeworktrack.serble.net:9898";
         APIShit.Url = ip.text;
         
-        UnityWebRequest ping = APIShit.CreateRequest("api", APIShit.HttpVerb.GET, "", APIShit.Auth.None);
+        UnityWebRequest ping = APIShit.CreateRequest("api", APIShit.HttpVerb.Get, "", APIShit.Auth.None);
         yield return ping.SendWebRequest();
         if (ping.responseCode != 200) {
             // Server is down, oh no
@@ -85,7 +92,7 @@ public class Login : MonoBehaviour {
         
         // They have logged in before
         APIShit.Token = PlayerPrefs.GetString("token");
-        UnityWebRequest loginReq = APIShit.CreateRequest("api/tasks", APIShit.HttpVerb.GET);
+        UnityWebRequest loginReq = APIShit.CreateRequest("api/tasks", APIShit.HttpVerb.Get);
         yield return loginReq.SendWebRequest();
         if (loginReq.responseCode == 200) {
             // Login success
@@ -114,7 +121,7 @@ public class Login : MonoBehaviour {
         PlayerPrefs.SetString("ip", ip.text);
         PlayerPrefs.Save();
 
-        UnityWebRequest ping = APIShit.CreateRequest("api", APIShit.HttpVerb.GET, "", APIShit.Auth.None);
+        UnityWebRequest ping = APIShit.CreateRequest("api", APIShit.HttpVerb.Get, "", APIShit.Auth.None);
         yield return ping.SendWebRequest();
         connectButtonText.text = "Connect";
         connectButton.interactable = true;
@@ -181,7 +188,7 @@ public class Login : MonoBehaviour {
             case 0:
                 // Login
                 UnityWebRequest loginReq = APIShit.CreateRequest(
-                    "auth", APIShit.HttpVerb.GET, "", APIShit.Auth.Basic, $"{username.text}:{password.text}");
+                    "auth", APIShit.HttpVerb.Get, "", APIShit.Auth.Basic, $"{username.text}:{password.text}");
                 yield return loginReq.SendWebRequest();
                 if (loginReq.responseCode != 200) {
                     // failed
@@ -197,7 +204,7 @@ public class Login : MonoBehaviour {
             
             case 1:
                 // Register
-                UnityWebRequest regReq = APIShit.CreateRequest("api/users", APIShit.HttpVerb.POST, "", APIShit.Auth.Basic,
+                UnityWebRequest regReq = APIShit.CreateRequest("api/users", APIShit.HttpVerb.Post, "", APIShit.Auth.Basic,
                     $"{username.text}:{password.text}");
                 yield return regReq.SendWebRequest();
                 if (regReq.responseCode != 201) {
@@ -208,7 +215,7 @@ public class Login : MonoBehaviour {
                 }
                 // login
                 loginReq = APIShit.CreateRequest(
-                    "auth", APIShit.HttpVerb.GET, "", APIShit.Auth.Basic, $"{username.text}:{password.text}");
+                    "auth", APIShit.HttpVerb.Get, "", APIShit.Auth.Basic, $"{username.text}:{password.text}");
                 yield return loginReq.SendWebRequest();
                 APIShit.Token = loginReq.downloadHandler.text;
                 PlayerPrefs.SetString("token", APIShit.Token);

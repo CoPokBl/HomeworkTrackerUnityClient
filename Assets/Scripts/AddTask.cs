@@ -2,29 +2,35 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using API;
-using HomeworkTrackerClient;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Color = System.Drawing.Color;
+using Color = API.Color;
 
 public class AddTask : MonoBehaviour {
     public InputField @class;
-    public Dropdown classColour;
+    public Dropdown   classColour;
     public InputField type;
-    public Dropdown typeColour;
+    public Dropdown   typeColour;
     public InputField task;
-    public Toggle enableDueDate;
+    public Toggle     enableDueDate;
     public InputField dueDateD;
     public InputField dueDateM;
     public InputField dueDateY;
 
     public void AddTaskFunc() {
-        StartCoroutine(AddTaskFuncCo());
+        try {
+            StartCoroutine(AddTaskFuncCo());
+        }
+        catch (Exception e) {
+            FileLogging.Error(e.ToString());
+        }
     }
 
     private IEnumerator AddTaskFuncCo() {
+        
+        // COLOURS
         Color cColour = Color.FromName(classColour.options[classColour.value].text.ToLower());
         if (classColour.value == 0) {
             cColour = Color.Empty;
@@ -34,6 +40,7 @@ public class AddTask : MonoBehaviour {
             tColour = Color.Empty;
         }
 
+        // DUE DATE
         DateTime due = DateTime.MaxValue;
         if (enableDueDate.isOn) {
             // do due date
@@ -50,14 +57,16 @@ public class AddTask : MonoBehaviour {
             }
         }
         
+        // CREATE ITEM OBJECT FOR EASE OF ACCESS
         TaskItem item = new TaskItem {
-            Class = new ColouredString(@class.text, cColour),
-            Type = new ColouredString(type.text, tColour),
+            Class = new ColouredString(@class.text, cColour),  // CLASS
+            Type = new ColouredString(type.text, tColour),     // TYPE
             Task = task.text,
             dueDate = due
         };
 
-        UnityWebRequest addTaskReq = APIShit.CreateRequest("api/tasks", APIShit.HttpVerb.PUT, new Dictionary<string, string> {
+        // SEND ADD ITEM REQUEST
+        UnityWebRequest addTaskReq = APIShit.CreateRequest("api/tasks", APIShit.HttpVerb.Put, new Dictionary<string, string> {
             { "class", item.Class.Text },
             { "classColour", APIShit.StrFromColor(item.Class.Color) },
             
@@ -71,9 +80,10 @@ public class AddTask : MonoBehaviour {
         yield return addTaskReq.SendWebRequest();
         if (addTaskReq.responseCode != 201) {
             // error
-            Debug.LogError("Failed to add item: " + addTaskReq.responseCode + addTaskReq.downloadHandler.text);
+            FileLogging.Error("Failed to add item: " + addTaskReq.responseCode + addTaskReq.downloadHandler.text);
         }
 
+        // Go back to the main menu
         SceneManager.LoadScene("GUI");
     }
 
