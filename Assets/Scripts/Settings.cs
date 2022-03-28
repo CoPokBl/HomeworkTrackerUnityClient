@@ -51,7 +51,7 @@ public class Settings : MonoBehaviour {
         Dictionary<string, string> resultDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
         
         // get user id
-        string userId = resultDict["id"];
+        string userId = resultDict["guid"];
         
         
         UnityWebRequest deleteUserReq = APIShit.CreateRequest($"api/users/{userId}", APIShit.HttpVerb.Delete);
