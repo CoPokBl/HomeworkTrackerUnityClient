@@ -1,12 +1,20 @@
 using System;
 using System.IO;
-using UnityEditorInternal;
 
 public class FileLogging {
     private const int LoggingLevel = 3;
-    public const string LogFile = "/home/copokbl/homeworktrackerunityclient.log";
+    public static string LogFile = "/home/copokbl/homeworktrackerunityclient.log";
 
     public static void Debug(string msg, Severity severity = Severity.Debug) {
+        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (home[0] == '/') {
+            // linux
+            LogFile = home + "/homeworktrackerunityclient.log";
+        }
+        else {
+            // windows
+            LogFile = home + "\\homeworktrackerunityclient.log";
+        }
         if (LoggingLevel < (int) severity) return;
         if (!File.Exists(LogFile)) {
             FileStream a = File.Create(LogFile);

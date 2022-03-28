@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace API {
@@ -12,7 +11,7 @@ namespace API {
         public static string Url = "http://homeworktrack.serble.net:9898/";
 
         public enum Auth { None, Token, Basic }
-        public enum HttpVerb { Get, Post, Put, Delete }
+        public enum HttpVerb { Get, Post, Put, Delete, Patch }
 
         public static UnityWebRequest CreateRequest(string path, HttpVerb verb, Dictionary<string, string> dick,
             Auth auth = Auth.Token, string usrPwd = "") {
@@ -40,6 +39,10 @@ namespace API {
                     break;
                 case HttpVerb.Delete:
                     req = UnityWebRequest.Delete($"{Url}/{path}");
+                    break;
+                case HttpVerb.Patch:
+                    req = UnityWebRequest.Put($"{Url}/{path}", dick);
+                    req.method = "PATCH";
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(verb), verb, null);

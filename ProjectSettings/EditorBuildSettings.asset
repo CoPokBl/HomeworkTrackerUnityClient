@@ -20,4 +20,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/EditTask.unity
     guid: 989edd78d5acfe2b39bba5a4b29b9ba2
+  - enabled: 1
+    path: Assets/Scenes/Settings.unity
+    guid: 5dfa345272e5457bba6c494b6cd71041
+  - enabled: 1
+    path: Assets/Scenes/ChangeCredentials.unity
+    guid: 9ed25a603b402cff7a79f68d85b46bd6
   m_configObjects: {}

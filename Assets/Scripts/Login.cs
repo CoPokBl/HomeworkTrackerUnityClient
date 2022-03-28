@@ -198,6 +198,7 @@ public class Login : MonoBehaviour {
                 }
                 APIShit.Token = loginReq.downloadHandler.text;
                 PlayerPrefs.SetString("token", APIShit.Token);
+                PlayerPrefs.SetString("username", username.text);
                 PlayerPrefs.Save();
                 SceneManager.LoadScene("GUI");
                 break;
@@ -219,6 +220,7 @@ public class Login : MonoBehaviour {
                 yield return loginReq.SendWebRequest();
                 APIShit.Token = loginReq.downloadHandler.text;
                 PlayerPrefs.SetString("token", APIShit.Token);
+                PlayerPrefs.SetString("username", username.text);
                 PlayerPrefs.Save();
                 SceneManager.LoadScene("GUI");
                 break;
