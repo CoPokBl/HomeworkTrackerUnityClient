@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 namespace API {
     public static class APIShit {
         public static string Token = "";
-        public static readonly Version APIVer = new Version(0, 5, 0);
+        public static readonly Version APIVer = new Version(0, 8, 0);
         public static string Url = "http://homeworktrack.serble.net:9898/";
 
         public enum Auth { None, Token, Basic }
