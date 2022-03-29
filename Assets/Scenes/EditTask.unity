@@ -324,7 +324,7 @@ MonoBehaviour:
   m_LineType: 0
   m_HideMobileInput: 0
   m_CharacterValidation: 1
-  m_CharacterLimit: 0
+  m_CharacterLimit: 2
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls: []
@@ -815,7 +815,7 @@ MonoBehaviour:
   m_LineType: 0
   m_HideMobileInput: 0
   m_CharacterValidation: 0
-  m_CharacterLimit: 0
+  m_CharacterLimit: 255
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls: []
@@ -1275,7 +1275,7 @@ MonoBehaviour:
   m_LineType: 0
   m_HideMobileInput: 0
   m_CharacterValidation: 1
-  m_CharacterLimit: 0
+  m_CharacterLimit: 4
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls: []
@@ -1420,7 +1420,7 @@ MonoBehaviour:
   m_LineType: 0
   m_HideMobileInput: 0
   m_CharacterValidation: 0
-  m_CharacterLimit: 0
+  m_CharacterLimit: 255
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls: []
@@ -2772,6 +2772,7 @@ GameObject:
   - component: {fileID: 1058231386}
   - component: {fileID: 1058231385}
   - component: {fileID: 1058231384}
+  - component: {fileID: 1058231387}
   m_Layer: 5
   m_Name: Dropdown
   m_TagString: Untagged
@@ -2922,6 +2923,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1058231382}
   m_CullTransparentMesh: 1
+--- !u!114 &1058231387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1058231382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40f8acd41ecab2bdaeec7032e491bfe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1066135703
 GameObject:
   m_ObjectHideFlags: 0
@@ -4235,7 +4248,7 @@ MonoBehaviour:
   m_LineType: 0
   m_HideMobileInput: 0
   m_CharacterValidation: 0
-  m_CharacterLimit: 0
+  m_CharacterLimit: 255
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls: []
@@ -4383,6 +4396,7 @@ GameObject:
   - component: {fileID: 1542305469}
   - component: {fileID: 1542305468}
   - component: {fileID: 1542305467}
+  - component: {fileID: 1542305470}
   m_Layer: 5
   m_Name: Dropdown
   m_TagString: Untagged
@@ -4533,6 +4547,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1542305465}
   m_CullTransparentMesh: 1
+--- !u!114 &1542305470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1542305465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40f8acd41ecab2bdaeec7032e491bfe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1618026913
 GameObject:
   m_ObjectHideFlags: 0
@@ -5866,7 +5892,7 @@ MonoBehaviour:
   m_LineType: 0
   m_HideMobileInput: 0
   m_CharacterValidation: 1
-  m_CharacterLimit: 0
+  m_CharacterLimit: 2
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls: []

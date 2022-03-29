@@ -12,6 +12,8 @@ public class ChangeDetails : MonoBehaviour {
     public Text errorText;
     public InputField username;
     public InputField password;
+    public Button updateButton;
+    public Text updateButtonLabel;
 
     public void UpdateDetails() {
         StartCoroutine(UpdateDetailsCo());
@@ -19,6 +21,10 @@ public class ChangeDetails : MonoBehaviour {
 
     private IEnumerator UpdateDetailsCo() {
         
+        // disable button and change text to "Updating..."
+        updateButton.interactable = false;
+        updateButtonLabel.text = "Updating...";
+
         // get username
         string username = PlayerPrefs.GetString("username");
         
@@ -64,11 +70,18 @@ public class ChangeDetails : MonoBehaviour {
             // fail
             FileLogging.Error("Failed to update user details");
             errorText.text = "Failed to update user details, try again later. (Error code: " + patchUserReq.responseCode + ")";
+            // enable button and change text back to "Update"
+            updateButton.interactable = true;
+            updateButtonLabel.text = "Update";
+            yield break;
         }
 
         if (!changedPassword) {
             // I can't log them in because the password isn't stored
-            SceneManager.LoadScene("Login");
+            // enable button and change text back to "Update"
+            updateButton.interactable = true;
+            updateButtonLabel.text = "Update";
+            SceneManager.LoadScene("GUI");
             yield break;
         }
 
@@ -82,7 +95,10 @@ public class ChangeDetails : MonoBehaviour {
         PlayerPrefs.SetString("token", APIShit.Token);
         PlayerPrefs.SetString("username", currentUsername);
         PlayerPrefs.Save();
-        SceneManager.LoadScene("Settings");
+        // enable button and change text back to "Update"
+        updateButton.interactable = true;
+        updateButtonLabel.text = "Update";
+        SceneManager.LoadScene("GUI");
     }
     
 }

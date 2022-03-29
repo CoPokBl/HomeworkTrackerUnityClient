@@ -124,8 +124,25 @@ public class GUI : MonoBehaviour {
                     case "DueDate":
                         Text dueTxt = child.GetComponent<Text>();
                         DateTime localTime = task.dueDate.ToLocalTime();
-                        dueTxt.text = task.dueDate == DateTime.MaxValue 
-                            ? "No Due Date" : $"Due: {localTime.Year}/{localTime.Month}/{localTime.Day}";
+                        bool relTime = PlayerPrefs.GetInt("relTime", 0) == 1;
+                        FileLogging.Debug($"Relative time is toggled: {relTime}");
+                        if (relTime) {
+                            // get the time difference
+                            if (localTime < DateTime.Now) {
+                                // it's overdue
+                                dueTxt.text = "Overdue";
+                            }
+                            else {
+                                TimeSpan diff = localTime - DateTime.Now;
+                                dueTxt.text = task.dueDate == DateTime.MaxValue 
+                                    ? "No Due Date" : $"Due in {diff.Days} days";
+                            }
+                        }
+                        else {
+                            dueTxt.text = task.dueDate == DateTime.MaxValue 
+                                ? "No Due Date" : $"Due: {localTime.Year}/{localTime.Month}/{localTime.Day}";
+                        }
+                        
                         if (DateTime.UtcNow > task.dueDate) {
                             dueTxt.color = UnityEngine.Color.red;
                         }

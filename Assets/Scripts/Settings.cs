@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using API;
@@ -10,6 +11,7 @@ using UnityEngine.UI;
 public class Settings : MonoBehaviour {
 
     public Text infoText;
+    public Toggle relTimeToggle;
     
     private bool _deleteAccountConfirmation;
 
@@ -66,6 +68,21 @@ public class Settings : MonoBehaviour {
         
         // success
         SceneManager.LoadScene("Login");
+    }
+
+    private void Start() {
+        relTimeToggle.isOn = PlayerPrefs.GetInt("relTime", 0) == 1;
+    }
+
+
+    public void RelTimeToggleChanged() {
+        
+        // set the player prefs
+        PlayerPrefs.SetInt("relTime", relTimeToggle.isOn ? 1 : 0);
+        PlayerPrefs.Save();
+        
+        FileLogging.Debug("Toggled relative time to " + relTimeToggle.isOn);
+        
     }
     
 }

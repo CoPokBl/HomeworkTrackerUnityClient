@@ -18,6 +18,7 @@ public class AddTask : MonoBehaviour {
     public InputField dueDateD;
     public InputField dueDateM;
     public InputField dueDateY;
+    public Button     addTaskButton;
 
     public void AddTaskFunc() {
         try {
@@ -30,6 +31,9 @@ public class AddTask : MonoBehaviour {
 
     private IEnumerator AddTaskFuncCo() {
         
+        // disable button
+        addTaskButton.interactable = false;
+
         // COLOURS
         Color cColour = Color.FromName(classColour.options[classColour.value].text.ToLower());
         if (classColour.value == 0) {
@@ -53,6 +57,8 @@ public class AddTask : MonoBehaviour {
                 dueDateY.text = now.Year.ToString();
                 dueDateM.text = now.Month.ToString();
                 dueDateD.text = now.Day.ToString();
+                // enable button
+                addTaskButton.interactable = true;
                 yield break;
             }
         }
@@ -82,6 +88,9 @@ public class AddTask : MonoBehaviour {
             // error
             FileLogging.Error("Failed to add item: " + addTaskReq.responseCode + addTaskReq.downloadHandler.text);
         }
+        
+        // enable button
+        addTaskButton.interactable = true;
 
         // Go back to the main menu
         SceneManager.LoadScene("GUI");

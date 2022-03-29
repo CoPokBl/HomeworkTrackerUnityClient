@@ -52,13 +52,13 @@ public class EditTask : MonoBehaviour {
 
         // || Set dropdown values ||
         // CLASS COLOUR
-        int classColourValue = ColorToIntDropdown(item.Class.Color);
+        int classColourValue = ColourDropdown.GetColourNumber(ColourDropdown.GetSelectedColour(item.Class.Color));
         @class.text = item.Class.Text;
         classColour.value = classColourValue;
         classColour.RefreshShownValue();
         
         // TYPE COLOUR
-        int typeColourValue = ColorToIntDropdown(item.Type.Color);
+        int typeColourValue = ColourDropdown.GetColourNumber(ColourDropdown.GetSelectedColour(item.Type.Color));
         type.text = item.Type.Text;
         typeColour.value = typeColourValue;
         typeColour.RefreshShownValue();
@@ -152,57 +152,4 @@ public class EditTask : MonoBehaviour {
         SceneManager.LoadScene("GUI");
     }
 
-    // Convert colour to int for the value for the colour dropdowns
-    private int ColorToIntDropdown(Color color) {
-        // black, blue, red, green, yellow, red, orange, purple, cyan, brown, lime, gold, grey, violet, deep pink
-        FileLogging.Debug("Color RGB: " + color.R + ", " + color.G + ", " + color.B);
-        if (color == Color.Black) {
-            return 0;
-        }
-        if (color == Color.Blue) {
-            return 1;
-        }
-        if (color == Color.Red) {
-            return 2;
-        }
-        if (color == Color.Green) {
-            return 3;
-        }
-        if (color == Color.Yellow) {
-            return 4;
-        }
-        if (color == Color.Red) {
-            return 5;
-        }
-        if (color == Color.Orange) {
-            return 6;
-        }
-        if (color == Color.Purple) {
-            return 7;
-        }
-        if (color == Color.Cyan) {
-            return 8;
-        }
-        if (color == Color.Brown) {
-            return 9;
-        }
-        if (color == Color.Lime) {
-            return 10;
-        }
-        if (color == Color.Gold) {
-            return 11;
-        }
-        if (color == Color.Gray) {
-            return 12;
-        }
-        if (color == Color.Violet) {
-            return 13;
-        }
-        if (color == Color.DeepPink) {
-            return 14;
-        }
-
-        return 0;
-    }
-    
 }

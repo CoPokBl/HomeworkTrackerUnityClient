@@ -69,6 +69,9 @@
      <Compile Include="Assets\Scripts\EditTask.cs" />
      <Compile Include="Assets\Scripts\API\APIShit.cs" />
      <Compile Include="Assets\Scripts\AddTask.cs" />
+     <Compile Include="Assets\Scripts\ColourDropdown.cs" />
+     <Compile Include="Assets\Scripts\Themes.cs" />
+     <Compile Include="Assets\Scripts\Theme.cs" />
  <Reference Include="UnityEngine">
  <HintPath>/home/copokbl/Unity/Hub/Editor/2020.3.32f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
  </Reference>
