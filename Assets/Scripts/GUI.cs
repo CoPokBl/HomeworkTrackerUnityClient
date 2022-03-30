@@ -14,6 +14,7 @@ public class GUI : MonoBehaviour {
     public GameObject viewContent;
     public Button     refreshButton;
     public Text       refreshButtonText;
+    public Text       errorText;
 
     // This fixes issues with the tasks scroll position not starting at the top
     private bool      _hasSnapped;
@@ -71,112 +72,122 @@ public class GUI : MonoBehaviour {
             yield break;
         }
 
-        if (tasks.Count == 0) {
-            // no homework :)
-            refreshButton.interactable = true;
-            refreshButtonText.text = "Refresh";
-            noHomework.enabled = true;
-            yield break;
-        }
-        
-        // rip there's homework
-        Vector3 cPos = new Vector3(0f, 160f - 430f, 0f);
-        foreach (TaskItem task in tasks) {
-            FileLogging.Debug($"Adding {task.Task}...");
-            GameObject obj = Instantiate(taskPrefab, viewContent.transform);
-            transform.GetComponent<Themes>().ApplyThemeTo(obj.transform);
-            obj.transform.position = cPos;
-            GameObject[] children = new GameObject[obj.transform.childCount];
-            for (int i = 0; i < obj.transform.childCount; i++) {
-                children[i] = obj.transform.GetChild(i).gameObject;
+        // Catch all errors displaying tasks
+        try {
+            if (tasks.Count == 0) {
+                // no homework :)
+                refreshButton.interactable = true;
+                refreshButtonText.text = "Refresh";
+                noHomework.enabled = true;
+                yield break;
             }
-            foreach (GameObject child in children) {
-                switch (child.name) {
+        
+            // rip there's homework
+            Vector3 cPos = new Vector3(0f, 160f - 430f, 0f);
+            foreach (TaskItem task in tasks) {
+                FileLogging.Debug($"Adding {task.Task}...");
+                GameObject obj = Instantiate(taskPrefab, viewContent.transform);
+                transform.GetComponent<Themes>().ApplyThemeTo(obj.transform);
+                obj.transform.position = cPos;
+                GameObject[] children = new GameObject[obj.transform.childCount];
+                for (int i = 0; i < obj.transform.childCount; i++) {
+                    children[i] = obj.transform.GetChild(i).gameObject;
+                }
+                foreach (GameObject child in children) {
+                    switch (child.name) {
                     
-                    default:
-                        FileLogging.Error("Child of task object '" + child.name + "' shouldn't exist! Is this client out of date?");
-                        break;
+                        default:
+                            FileLogging.Error("Child of task object '" + child.name + "' shouldn't exist! Is this client out of date?");
+                            break;
                     
-                    case "edit":
-                    case "delete":
-                    case "background":
-                        // I don't want it to display an error when it gets to these
-                        break;
+                        case "edit":
+                        case "delete":
+                        case "background":
+                            // I don't want it to display an error when it gets to these
+                            break;
                     
-                    case "Class":
-                        Text classTxt = child.GetComponent<Text>();
-                        classTxt.text = task.Class.Text;
-                        Color cs = task.Class.Color;
-                        if (cs == Color.Empty) {
-                            cs = new Color(Themes.CurrentTheme.TextColour);
-                        }
-                        classTxt.color = new UnityEngine.Color(cs.R, cs.G, cs.B, cs.A);
-                        break;
+                        case "Class":
+                            Text classTxt = child.GetComponent<Text>();
+                            classTxt.text = task.Class.Text;
+                            Color cs = task.Class.Color;
+                            if (cs == Color.Empty) {
+                                cs = new Color(Themes.CurrentTheme.TextColour);
+                            }
+                            classTxt.color = new UnityEngine.Color(cs.R, cs.G, cs.B, cs.A);
+                            break;
                     
-                    case "Type":
-                        Text typeTxt = child.GetComponent<Text>();
-                        typeTxt.text = task.Type.Text;
-                        Color ts = task.Type.Color;
-                        if (ts == Color.Empty) {
-                            ts = new Color(Themes.CurrentTheme.TextColour);
-                        }
-                        typeTxt.color = new UnityEngine.Color(ts.R, ts.G, ts.B, ts.A);
-                        break;
+                        case "Type":
+                            Text typeTxt = child.GetComponent<Text>();
+                            typeTxt.text = task.Type.Text;
+                            Color ts = task.Type.Color;
+                            if (ts == Color.Empty) {
+                                ts = new Color(Themes.CurrentTheme.TextColour);
+                            }
+                            typeTxt.color = new UnityEngine.Color(ts.R, ts.G, ts.B, ts.A);
+                            break;
                     
-                    case "Task":
-                        Text taskTxt = child.GetComponent<Text>();
-                        taskTxt.text = task.Task;
-                        break;
+                        case "Task":
+                            Text taskTxt = child.GetComponent<Text>();
+                            taskTxt.text = task.Task;
+                            break;
                     
-                    case "DueDate":
-                        Text dueTxt = child.GetComponent<Text>();
-                        DateTime localTime = task.dueDate.ToLocalTime();
-                        bool relTime = PlayerPrefs.GetInt("relTime", 0) == 1;
-                        FileLogging.Debug($"Relative time is toggled: {relTime}");
-                        if (relTime) {
-                            // get the time difference
-                            if (localTime < DateTime.Now) {
-                                // it's overdue
-                                dueTxt.text = "Overdue";
+                        case "DueDate":
+                            Text dueTxt = child.GetComponent<Text>();
+                            DateTime localTime = task.dueDate.ToLocalTime();
+                            bool relTime = PlayerPrefs.GetInt("relTime", 0) == 1;
+                            FileLogging.Debug($"Relative time is toggled: {relTime}");
+                            if (relTime) {
+                                // get the time difference
+                                if (localTime < DateTime.Now) {
+                                    // it's overdue
+                                    dueTxt.text = "Overdue";
+                                }
+                                else {
+                                    TimeSpan diff = localTime - DateTime.Now;
+                                    dueTxt.text = task.dueDate == DateTime.MaxValue 
+                                        ? "No Due Date" : $"Due in {diff.Days} days";
+                                }
                             }
                             else {
-                                TimeSpan diff = localTime - DateTime.Now;
                                 dueTxt.text = task.dueDate == DateTime.MaxValue 
-                                    ? "No Due Date" : $"Due in {diff.Days} days";
+                                    ? "No Due Date" : $"Due: {localTime.Year}/{localTime.Month}/{localTime.Day}";
                             }
-                        }
-                        else {
-                            dueTxt.text = task.dueDate == DateTime.MaxValue 
-                                ? "No Due Date" : $"Due: {localTime.Year}/{localTime.Month}/{localTime.Day}";
-                        }
                         
-                        if (DateTime.UtcNow > task.dueDate) {
-                            dueTxt.color = UnityEngine.Color.red;
-                        }
-                        else if (DateTime.UtcNow.AddDays(5) > task.dueDate) {
-                            dueTxt.color = UnityEngine.Color.yellow;
-                        } else {
-                            dueTxt.color = Themes.CurrentTheme.TextColour;
-                        }
+                            if (DateTime.UtcNow > task.dueDate) {
+                                dueTxt.color = UnityEngine.Color.red;
+                            }
+                            else if (DateTime.UtcNow.AddDays(5) > task.dueDate) {
+                                dueTxt.color = UnityEngine.Color.yellow;
+                            } else {
+                                dueTxt.color = Themes.CurrentTheme.TextColour;
+                            }
 
-                        break;
+                            break;
                     
-                    case "ID":
-                        Text idTxt = child.GetComponent<Text>();
-                        idTxt.text = task.Id;
-                        break;
+                        case "ID":
+                            Text idTxt = child.GetComponent<Text>();
+                            idTxt.text = task.Id;
+                            break;
+                    }
                 }
             }
-        }
 
-        if (tasks.Count != 0) {
-            _hasFinishedLoadingTasks = true;
+            if (tasks.Count != 0) {
+                _hasFinishedLoadingTasks = true;
+            }
+        
+            refreshButton.interactable = true;
+            refreshButtonText.text = "Refresh";
+            FileLogging.Debug("Finished loading tasks");
+        }
+        catch (Exception e) {
+            FileLogging.Error("Failed to load tasks");
+            FileLogging.Error(e.ToString());
+            errorText.text = "Failed to load tasks, check log for details";
         }
         
         refreshButton.interactable = true;
         refreshButtonText.text = "Refresh";
-        FileLogging.Debug("Finished loading tasks");
-        
     }
 
     public void AddTask() {
