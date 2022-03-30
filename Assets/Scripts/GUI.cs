@@ -84,6 +84,7 @@ public class GUI : MonoBehaviour {
         foreach (TaskItem task in tasks) {
             FileLogging.Debug($"Adding {task.Task}...");
             GameObject obj = Instantiate(taskPrefab, viewContent.transform);
+            transform.GetComponent<Themes>().ApplyThemeTo(obj.transform);
             obj.transform.position = cPos;
             GameObject[] children = new GameObject[obj.transform.childCount];
             for (int i = 0; i < obj.transform.childCount; i++) {
@@ -98,7 +99,7 @@ public class GUI : MonoBehaviour {
                     
                     case "edit":
                     case "delete":
-                    case "Back":
+                    case "background":
                         // I don't want it to display an error when it gets to these
                         break;
                     
@@ -106,6 +107,9 @@ public class GUI : MonoBehaviour {
                         Text classTxt = child.GetComponent<Text>();
                         classTxt.text = task.Class.Text;
                         Color cs = task.Class.Color;
+                        if (cs == Color.Empty) {
+                            cs = new Color(Themes.CurrentTheme.TextColour);
+                        }
                         classTxt.color = new UnityEngine.Color(cs.R, cs.G, cs.B, cs.A);
                         break;
                     
@@ -113,6 +117,9 @@ public class GUI : MonoBehaviour {
                         Text typeTxt = child.GetComponent<Text>();
                         typeTxt.text = task.Type.Text;
                         Color ts = task.Type.Color;
+                        if (ts == Color.Empty) {
+                            ts = new Color(Themes.CurrentTheme.TextColour);
+                        }
                         typeTxt.color = new UnityEngine.Color(ts.R, ts.G, ts.B, ts.A);
                         break;
                     
@@ -149,7 +156,7 @@ public class GUI : MonoBehaviour {
                         else if (DateTime.UtcNow.AddDays(5) > task.dueDate) {
                             dueTxt.color = UnityEngine.Color.yellow;
                         } else {
-                            dueTxt.color = UnityEngine.Color.black;
+                            dueTxt.color = Themes.CurrentTheme.TextColour;
                         }
 
                         break;

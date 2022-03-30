@@ -78,10 +78,10 @@ namespace API {
                 JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(text);
             List<TaskItem> tasks = new List<TaskItem>();
         
-            foreach (var ucon in ucons) {
+            foreach (Dictionary<string, string> ucon in ucons) {
                 TaskItem item = new TaskItem(ucon["task"],
-                    new ColouredString(ucon["class"], APIShit.ColorFromStr(ucon["classColour"])),
-                    new ColouredString(ucon["type"], APIShit.ColorFromStr(ucon["typeColour"])),
+                    new ColouredString(ucon["class"], ColorFromStr(ucon["classColour"])),
+                    new ColouredString(ucon["type"], ColorFromStr(ucon["typeColour"])),
                     ucon["id"]);
         
                 if (ucon["dueDate"] != "0") {
@@ -95,10 +95,6 @@ namespace API {
         }
 
         public static Color ColorFromStr(string str) {
-            if (str == "-1.-1.-1") {
-                return Color.Empty;
-            }
-
             string[] strs = str.Split('.');
             return new Color(Convert.ToInt32(strs[0]), Convert.ToInt32(strs[1]), Convert.ToInt32(strs[2]));
         }

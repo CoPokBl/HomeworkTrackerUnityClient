@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using API;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -12,6 +13,7 @@ public class Settings : MonoBehaviour {
 
     public Text infoText;
     public Toggle relTimeToggle;
+    public Dropdown themeDropdown;
     
     private bool _deleteAccountConfirmation;
 
@@ -72,6 +74,19 @@ public class Settings : MonoBehaviour {
 
     private void Start() {
         relTimeToggle.isOn = PlayerPrefs.GetInt("relTime", 0) == 1;
+        
+        // set the themeDropdown options to the names of the themes in the theme objects
+        themeDropdown.ClearOptions();
+        themeDropdown.AddOptions(Themes.PresetThemes.Select(theme => theme.Name).ToList());
+        themeDropdown.value = PlayerPrefs.GetInt("theme", 0);
+    }
+
+
+    public void ThemeChanged() {
+        PlayerPrefs.SetInt("theme", themeDropdown.value);
+        PlayerPrefs.Save();
+        GetComponent<Themes>().SetTheme();
+        FileLogging.Info("Set theme to " + themeDropdown.value);
     }
 
 
@@ -81,7 +96,7 @@ public class Settings : MonoBehaviour {
         PlayerPrefs.SetInt("relTime", relTimeToggle.isOn ? 1 : 0);
         PlayerPrefs.Save();
         
-        FileLogging.Debug("Toggled relative time to " + relTimeToggle.isOn);
+        FileLogging.Info("Toggled relative time to " + relTimeToggle.isOn);
         
     }
     

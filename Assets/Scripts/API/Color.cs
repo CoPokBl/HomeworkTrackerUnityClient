@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace API {
     public class Color {
         public static readonly Color Red         = new Color(255, 0,   0);
@@ -29,12 +31,12 @@ namespace API {
         public static readonly Color LightOrange = new Color(255, 192, 128);
         public static readonly Color LightPink   = new Color(255, 182, 193);
         public static readonly Color Transparent = new Color(0,   0,   0);
-        public static readonly Color Empty       = new Color(0,   0,   0);
+        public static readonly Color Empty       = new Color(-1,  -1,  -1);
 
-        public byte R { get; set; }
-        public byte G { get; set; }
-        public byte B { get; set; }
-        public byte A { get; set; }
+        public int R { get; set; }
+        public int G { get; set; }
+        public int B { get; set; }
+        public int A { get; set; }
         
         public static bool operator ==(Color a, Color b) => a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
         public static bool operator !=(Color a, Color b) => !(a == b);
@@ -81,11 +83,12 @@ namespace API {
         public static Color FromName(string name) => new Color(name);
         public Color(byte r, byte g, byte b) { R = r; G = g; B = b; A = 255; }
         public Color(byte r, byte g, byte b, byte a) { R = r; G = g; B = b; A = a; }
-        public Color(int r, int g, int b) { R = (byte) r; G = (byte) g; B = (byte) b; A = 255; }
-        public Color(int r, int g, int b, int a) { R = (byte) r; G = (byte) g; B = (byte) b; A = (byte) a; }
+        public Color(int r, int g, int b) { R = r; G = g; B = b; A = 255; }
+        public Color(int r, int g, int b, int a) { R = r; G = g; B = b; A = a; }
         public Color(Color color) { R = color.R; G = color.G; B = color.B; A = color.A; }
         public Color(Color color, byte a) { R = color.R; G = color.G; B = color.B; A = a; }
-        public Color(Color color, int a) { R = color.R; G = color.G; B = color.B; A = (byte) a; }
+        public Color(Color color, int a) { R = color.R; G = color.G; B = color.B; A = a; }
+        public Color(UnityEngine.Color color) { R = (int)color.r; G = (int)color.g; B = (int)color.b; A = (int)color.a; }
 
     }
 }

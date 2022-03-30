@@ -52,13 +52,19 @@ public class EditTask : MonoBehaviour {
 
         // || Set dropdown values ||
         // CLASS COLOUR
-        int classColourValue = ColourDropdown.GetColourNumber(ColourDropdown.GetSelectedColour(item.Class.Color));
+        Color selColour = item.Class.Color != Color.Empty
+            ? item.Class.Color
+            : new Color(Themes.CurrentTheme.TextColour);
+        int classColourValue = ColourDropdown.GetColourNumber(ColourDropdown.GetSelectedColour(selColour));
         @class.text = item.Class.Text;
         classColour.value = classColourValue;
         classColour.RefreshShownValue();
         
         // TYPE COLOUR
-        int typeColourValue = ColourDropdown.GetColourNumber(ColourDropdown.GetSelectedColour(item.Type.Color));
+        Color selColour2 = item.Type.Color != Color.Empty
+            ? item.Type.Color
+            : new Color(Themes.CurrentTheme.TextColour);
+        int typeColourValue = ColourDropdown.GetColourNumber(ColourDropdown.GetSelectedColour(selColour));
         type.text = item.Type.Text;
         typeColour.value = typeColourValue;
         typeColour.RefreshShownValue();

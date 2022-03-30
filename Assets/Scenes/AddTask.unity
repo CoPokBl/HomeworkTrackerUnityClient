@@ -2127,6 +2127,7 @@ GameObject:
   - component: {fileID: 726216092}
   - component: {fileID: 726216091}
   - component: {fileID: 726216095}
+  - component: {fileID: 726216096}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -2243,6 +2244,18 @@ MonoBehaviour:
   dueDateM: {fileID: 2022152617}
   dueDateY: {fileID: 434337217}
   addTaskButton: {fileID: 1176141992}
+--- !u!114 &726216096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 726216090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba18a4581b5f4cdda74ecd7ff1e3defa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &742801460
 GameObject:
   m_ObjectHideFlags: 0

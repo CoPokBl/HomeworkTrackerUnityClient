@@ -54,24 +54,24 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\Login.cs" />
      <Compile Include="Assets\Scripts\Console.cs" />
+     <Compile Include="Assets\Scripts\Theme.cs" />
      <Compile Include="Assets\Scripts\FileLogging.cs" />
      <Compile Include="Assets\Scripts\Settings.cs" />
      <Compile Include="Assets\Scripts\EditButton.cs" />
      <Compile Include="Assets\Scripts\GUI.cs" />
      <Compile Include="Assets\Scripts\ChangeDetails.cs" />
      <Compile Include="Assets\Scripts\DeleteTask.cs" />
+     <Compile Include="Assets\Scripts\Themes.cs" />
      <Compile Include="Assets\Scripts\API\TaskItem.cs" />
      <Compile Include="Assets\Scripts\ErrorProtection.cs" />
      <Compile Include="Assets\Scripts\ChangeScene.cs" />
      <Compile Include="Assets\Scripts\Data.cs" />
      <Compile Include="Assets\Scripts\API\Color.cs" />
+     <Compile Include="Assets\Scripts\ColourDropdown.cs" />
      <Compile Include="Assets\Scripts\API\ColouredString.cs" />
      <Compile Include="Assets\Scripts\EditTask.cs" />
      <Compile Include="Assets\Scripts\API\APIShit.cs" />
      <Compile Include="Assets\Scripts\AddTask.cs" />
-     <Compile Include="Assets\Scripts\ColourDropdown.cs" />
-     <Compile Include="Assets\Scripts\Themes.cs" />
-     <Compile Include="Assets\Scripts\Theme.cs" />
  <Reference Include="UnityEngine">
  <HintPath>/home/copokbl/Unity/Hub/Editor/2020.3.32f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
  </Reference>
