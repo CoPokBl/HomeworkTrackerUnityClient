@@ -38,7 +38,7 @@ public class Login : MonoBehaviour {
 
     private IEnumerator StartFuncCo() {
 
-        ip.text = PlayerPrefs.HasKey("ip") ? PlayerPrefs.GetString("ip") : "http://homeworktrack.serble.net:9898";
+        ip.text = PlayerPrefs.HasKey("ip") ? PlayerPrefs.GetString("ip") : "https://homeworktrack.serble.net:9897";
         APIShit.Url = ip.text;
         
         UnityWebRequest ping = APIShit.CreateRequest("api", APIShit.HttpVerb.Get, "", APIShit.Auth.None);
